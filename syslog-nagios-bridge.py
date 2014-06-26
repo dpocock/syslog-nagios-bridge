@@ -228,14 +228,21 @@ if __name__ == '__main__':
         # Run the Collector in a thread to listen for incoming connections
         c = netsyslog.Collector(bind_port, MyHandler)
         thread = Thread(target = c.run)
+        thread.daemon = True
         thread.start()
         while True:
-            frame = q.get()
-            logger.debug("got a frame from the queue")
             try:
-                handle_frame(frame)
-            except Exception as e:
-                logger.error("Failed to handle an event: %s" % e)
+                # we set a timeout for Queue.get() so that it can be
+                # interrupted by ctrl-C.  See issue no. 1360
+                # http://bugs.python.org/issue1360
+                frame = q.get(True, 1)
+                logger.debug("got a frame from the queue")
+                try:
+                    handle_frame(frame)
+                except Exception as e:
+                    logger.error("Failed to handle an event: %s" % e)
+            except Queue.Empty:
+                pass
     except Exception as e:
         logging.error("Unexpected failure: %s" % e)
  
