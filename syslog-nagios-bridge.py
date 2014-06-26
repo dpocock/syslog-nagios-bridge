@@ -67,10 +67,18 @@ class MyHandler(netsyslog.SyslogTCPHandler):
 # (some bad syslog implementations send domain parts)
 # normalize to lowercase
 def clean_host_name(hostname):
+    if hostname is None:
+        return None
+    if hostname == "" or hostname == "-":
+        return None
     return hostname.split(".")[0].lower()
 
 # make sure tag names don't contain illegal characters
 def clean_tag_name(tag):
+    if tag is None:
+        return None
+    if tag == "" or tag == "-":
+        return None
     # FIXME - use something more efficient than a regular expression
     _tag = re.sub(r"\W+", "", tag)
     if tag != _tag:
@@ -146,7 +154,13 @@ def handle_frame(frame):
 
     # Get the hostname and tag, lookup the properties for this pair:
     _hostname = clean_host_name(frame.header.hostname)
+    if _hostname is None:
+        logger.debug("bad or missing hostname, ignoring message")
+        return
     _tag = clean_tag_name(frame.msg.tag)
+    if _tag is None:
+        logger.debug("bad or missing tag, ignoring message")
+        return
     _app = lookup_app(_hostname, _tag)
 
     # Check if we need to notify Nagios
