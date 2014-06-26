@@ -32,6 +32,7 @@ from threading import Thread
 import sys
 import syslog
 import time
+import urllib
 
 from pynag.Utils import CheckResult
 
@@ -41,6 +42,7 @@ hosts = {}
 # default values (set from the config file)
 log_file = None
 log_level = logging.WARNING
+loganalyzer_url = None
 
 # This is a subclass of the SyslogTCPHandler from the netsyslog module.
 # It receives a notification (call to handle_message) each time a
@@ -67,10 +69,20 @@ class MyHandler(netsyslog.SyslogTCPHandler):
 # (some bad syslog implementations send domain parts)
 # normalize to lowercase
 def clean_host_name(hostname):
-    return hostname.split(".")[0].lower()
+    if hostname is None:
+        return None
+    if hostname == "" or hostname == "-":
+        return None
+    if hostname_strip_fqdn:
+        return hostname.split(".")[0].lower()
+    return hostname
 
 # make sure tag names don't contain illegal characters
 def clean_tag_name(tag):
+    if tag is None:
+        return None
+    if tag == "" or tag == "-":
+        return None
     # FIXME - use something more efficient than a regular expression
     _tag = re.sub(r"\W+", "", tag)
     if tag != _tag:
@@ -127,6 +139,10 @@ def lookup_app(hostname, tag):
                     f.write("        passive_checks_enabled          1\n")
                     f.write("        # generate email notifications after first error:\n")
                     f.write("        max_check_attempts              1\n")
+                    if loganalyzer_url is not None:
+                        search_query="syslogtag:=%s source:=%s" % (tag, hostname)
+                        action_url = "%s?filter=%s" % (loganalyzer_url, urllib.quote(search_query))
+                        f.write("        action_url                      %s\n" % action_url)
                     f.write("        }\n")
                 
     else:
@@ -146,7 +162,13 @@ def handle_frame(frame):
 
     # Get the hostname and tag, lookup the properties for this pair:
     _hostname = clean_host_name(frame.header.hostname)
+    if _hostname is None:
+        logger.debug("bad or missing hostname, ignoring message")
+        return
     _tag = clean_tag_name(frame.msg.tag)
+    if _tag is None:
+        logger.debug("bad or missing tag, ignoring message")
+        return
     _app = lookup_app(_hostname, _tag)
 
     # Check if we need to notify Nagios
@@ -206,14 +228,21 @@ if __name__ == '__main__':
         # Run the Collector in a thread to listen for incoming connections
         c = netsyslog.Collector(bind_port, MyHandler)
         thread = Thread(target = c.run)
+        thread.daemon = True
         thread.start()
         while True:
-            frame = q.get()
-            logger.debug("got a frame from the queue")
             try:
-                handle_frame(frame)
-            except Exception as e:
-                logger.error("Failed to handle an event: %s" % e)
+                # we set a timeout for Queue.get() so that it can be
+                # interrupted by ctrl-C.  See issue no. 1360
+                # http://bugs.python.org/issue1360
+                frame = q.get(True, 1)
+                logger.debug("got a frame from the queue")
+                try:
+                    handle_frame(frame)
+                except Exception as e:
+                    logger.error("Failed to handle an event: %s" % e)
+            except Queue.Empty:
+                pass
     except Exception as e:
         logging.error("Unexpected failure: %s" % e)
  
