@@ -71,7 +71,9 @@ def clean_host_name(hostname):
         return None
     if hostname == "" or hostname == "-":
         return None
-    return hostname.split(".")[0].lower()
+    if hostname_strip_fqdn:
+        return hostname.split(".")[0].lower()
+    return hostname
 
 # make sure tag names don't contain illegal characters
 def clean_tag_name(tag):
