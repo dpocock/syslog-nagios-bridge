@@ -1,0 +1,10 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: syslog-nagios-bridge
+Upstream-Contact: Daniel Pocock <daniel@pocock.pro>
+Source: https://github.com/dpocock/syslog-nagios-bridge
+
+Files: *
+Copyright: 2014, Daniel Pocock http://danielpocock.com
+License: GPL-3+
+ The GPL can be found in /usr/share/common-licenses/GPL-3 on your
+ Debian system.

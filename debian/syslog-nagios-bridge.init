@@ -1,0 +1,78 @@
+#!/bin/sh
+ 
+### BEGIN INIT INFO
+# Provides:          syslog-nagios-bridge
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the syslog-nagios-bridge server
+# Description:       starts syslog-nagios-bridge using start-stop-daemon
+### END INIT INFO
+ 
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/bin/syslog-nagios-bridge
+NAME=syslog-nagios-bridge
+DESC=syslog-nagios-bridge
+USER=nagios
+PIDFILE=/var/run/$NAME.pid
+RUN_AS_USER=nagios
+RUN_AS_GROUP=nagios
+
+# FIXME: syslog-nagios-bridge needs to be adapted to daemonize itself
+# and maintain its own PID file.
+# For now, we use the fork option to start-stop-daemon:
+FORK="-b -m"
+
+CHUID="--chuid ${RUN_AS_USER}:${RUN_AS_GROUP}"
+ 
+test -x $DAEMON || exit 0
+ 
+# Include defaults if available
+if [ -f /etc/default/syslog-nagios-bridge ] ; then
+    . /etc/default/syslog-nagios-bridge
+fi
+ 
+set -e
+ 
+. /lib/lsb/init-functions
+ 
+case "$1" in
+  start)
+    echo -n "Starting $DESC: "
+    start-stop-daemon --start --quiet --pidfile $PIDFILE \
+        --exec $DAEMON $CHUID $FORK -- $DAEMON_OPTS || true
+    echo "$NAME."
+    ;;
+  stop)
+    echo -n "Stopping $DESC: "
+    start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+        --exec $DAEMON || true
+    echo "$NAME."
+    ;;
+  restart|force-reload)
+    echo -n "Restarting $DESC: "
+    start-stop-daemon --stop --quiet --pidfile $PIDFILE \
+            --exec $DAEMON || true
+    sleep 1
+    start-stop-daemon --start --quiet --pidfile $PIDFILE \
+            --exec $DAEMON $CHUID $FORK -- $DAEMON_OPTS || true
+    echo "$NAME."
+    ;;
+  reload)
+      echo -n "Reloading $DESC configuration: "
+      start-stop-daemon --stop --signal HUP --quiet --pidfile $PIDFILE \
+          --exec $DAEMON || true
+      echo "$NAME."
+      ;;
+  status)
+      status_of_proc -p $PIDFILE "$DAEMON" syslog-nagios-bridge && exit 0 || exit $?
+      ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
+    exit 1
+    ;;
+esac
+ 
+exit 0

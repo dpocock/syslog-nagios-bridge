@@ -1,0 +1,5 @@
+syslog-nagios-bridge (1.0.0-1) unstable; urgency=low
+
+  * Initial packaging. (Closes: #752780)
+
+ -- Daniel Pocock <daniel@pocock.pro>  Thu, 26 Jun 2014 15:58:47 +0200

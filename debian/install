@@ -1,0 +1,2 @@
+usr/bin/syslog-nagios-bridge
+syslog-bridge.conf etc/nagios3/
