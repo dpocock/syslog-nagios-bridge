@@ -32,6 +32,7 @@ from threading import Thread
 import sys
 import syslog
 import time
+import urllib
 
 from pynag.Utils import CheckResult
 
@@ -41,6 +42,7 @@ hosts = {}
 # default values (set from the config file)
 log_file = None
 log_level = logging.WARNING
+loganalyzer_url = None
 
 # This is a subclass of the SyslogTCPHandler from the netsyslog module.
 # It receives a notification (call to handle_message) each time a
@@ -137,6 +139,10 @@ def lookup_app(hostname, tag):
                     f.write("        passive_checks_enabled          1\n")
                     f.write("        # generate email notifications after first error:\n")
                     f.write("        max_check_attempts              1\n")
+                    if loganalyzer_url is not None:
+                        search_query="syslogtag:=%s source:=%s" % (tag, hostname)
+                        action_url = "%s?filter=%s" % (loganalyzer_url, urllib.quote(search_query))
+                        f.write("        action_url                      %s\n" % action_url)
                     f.write("        }\n")
                 
     else:
