@@ -10,6 +10,17 @@ https://github.com/dpocock/syslog-nagios-bridge
 
 
 
+Dependencies
+------------
+
+python-netsyslog
+    https://github.com/dpocock/python-netsyslog
+
+pynag
+    http://pynag.org
+    (using latest code from Git, June 2014,
+    with the new Utils.CheckResult support)
+
 Installation
 ------------
 
@@ -54,4 +65,12 @@ syslog daemon and Nagios itself:
 # service rsyslog restart
 # service nagios3 reload
 
+The relevant services will go into the CRITICAL state after error events
+are detected by syslog-nagios-bridge.  Nagios has no way to know when
+the logs have been checked and whether anybody has taken action to
+correct the errors.  Consequently, the services will remain in the CRITICAL
+state indefinitely.  A user must go into the Nagios web interface
+and use the option "Submit passive check result for this service"
+to put the service back in the OK state.  Normally this is only done
+after manually investigating the error.
 
