@@ -1,5 +1,5 @@
-syslog-nagios-bridge (1.0.0-1) unstable; urgency=low
+syslog-nagios-bridge (1.0.1-1) unstable; urgency=low
 
   * Initial packaging. (Closes: #752780)
 
- -- Daniel Pocock <daniel@pocock.pro>  Thu, 26 Jun 2014 15:58:47 +0200
+ -- Daniel Pocock <daniel@pocock.pro>  Fri, 27 Jun 2014 20:03:54 +0200
