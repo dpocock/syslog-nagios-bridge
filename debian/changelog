@@ -1,3 +1,9 @@
+syslog-nagios-bridge (1.0.1-2) unstable; urgency=low
+
+  * Fix python-pynag dependency version constraint.
+
+ -- Daniel Pocock <daniel@pocock.pro>  Sun, 29 Jun 2014 14:49:57 +0200
+
 syslog-nagios-bridge (1.0.1-1) unstable; urgency=low
 
   * Initial packaging. (Closes: #752780)
