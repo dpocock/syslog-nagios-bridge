@@ -11,7 +11,7 @@ Vcs-Browser: https://github.com/dpocock/syslog-nagios-bridge
 
 Package: syslog-nagios-bridge
 Architecture: any
-Depends: ${misc:Depends}, python, nagios3 | icinga, python-pynag (>> 0.8.9), python-netsyslog
+Depends: ${misc:Depends}, python, nagios3 | icinga, python-pynag (>= 0.9.1), python-netsyslog
 Description: Syslog to Nagios integration
  syslog-nagios-bridge brings Syslog and Nagios together, listening for
  Syslog events from the network, determining when they meet an error
