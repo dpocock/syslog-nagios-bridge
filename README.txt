@@ -74,3 +74,16 @@ and use the option "Submit passive check result for this service"
 to put the service back in the OK state.  Normally this is only done
 after manually investigating the error.
 
+Logging from syslog-nagios-bridge itself
+----------------------------------------
+
+syslog-nagios-bridge creates its own logfile, it is defined in
+the configuration file.
+
+As it is a Python script, it could be adapted to use the handler for
+writing to SysLog.  There is a risk that this could lead to loops
+where log messages from syslog-nagios-bridge would be sent to the
+SysLog daemon and would come back to syslog-nagios-bridge like any other
+messages it is processing.  Therefore, it is recommended that it should
+only log to file and care should be taken to monitor the file for errors.
+
